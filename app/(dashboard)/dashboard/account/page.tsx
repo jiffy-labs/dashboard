@@ -1,14 +1,12 @@
 "use client"
 import BreadCrumb from '@/components/breadcrumb';
-import { UserClient } from '@/components/tables/user-tables/client';
-import { users } from '@/constants/data';
 import { useState } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 const breadcrumbItems = [{ title: 'Account', link: '/dashboard/account' }];
-export default function page() {
+export default function Page() {
   const { user, isLoaded } = useUser();
   const [name, setName] = useState(user?.fullName || '');
   const [image, setImage] = useState<File | null>(null);

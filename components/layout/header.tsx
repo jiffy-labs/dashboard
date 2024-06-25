@@ -1,3 +1,4 @@
+'use client'
 import ThemeToggle from '@/components/layout/ThemeToggle/theme-toggle';
 import { cn } from '@/lib/utils';
 import { MobileSidebar } from './mobile-sidebar';
@@ -6,6 +7,7 @@ import Link from 'next/link';
 import { SignOutButton } from '@clerk/nextjs';
 import { useTheme } from 'next-themes';
 export default function Header() {
+ const { theme, setTheme } = useTheme()
   return (
     <div className="supports-backdrop-blur:bg-background/60 fixed left-0 right-0 top-0 z-20 border-b bg-background/95 backdrop-blur">
       <nav className="flex h-14 items-center justify-between px-4">

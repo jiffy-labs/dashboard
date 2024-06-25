@@ -34,9 +34,15 @@ import {
 export type Icon = LucideIcon;
 
 
-const loadSvgIcon = (path: string) => (props: React.ImgHTMLAttributes<HTMLImageElement>) => (
-  <img src={path} {...props} alt="" />
-);
+const loadSvgIcon = (path: string) => {
+  const SvgIcon = (props: React.ImgHTMLAttributes<HTMLImageElement>) => (
+    <img src={path} {...props} alt="" />
+  );
+  
+  SvgIcon.displayName = `SvgIcon(${path})`;
+
+  return SvgIcon;
+};
 
 export const Icons = {
   dashboard: loadSvgIcon("/dashboard.svg"),
