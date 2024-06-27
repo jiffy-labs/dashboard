@@ -173,3 +173,29 @@ export const navItems: NavItem[] = [
 
  
 ];
+
+export const CHAINID_NETWORK_MAP = {
+  1: "mainnet",
+  137: "matic",
+  10: "optimism",
+  5: "goerli",
+  80001: "mumbai",
+  42161: "arbitrum-one",
+  43114: "avalanche",
+  43113: "avalanche-fuji",
+  84532: "base-sepolia",
+  100: "gnosis",
+  56: "bsc",
+  250: "fantom",
+  4002: "fantom-testnet",
+  122: "fuse",
+  8453: "base",
+  11155111: "sepolia",
+  421614: "arbitrum-sepolia",
+  97: "bnb-testnet",
+  80002: "polygon-amoy",
+  11155420: "optimism-sepolia",
+  7560: "cyber-mainnet",
+  78600: "vanar-testnet",
+  2040: "vanar-mainnet",
+};

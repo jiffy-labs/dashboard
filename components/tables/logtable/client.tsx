@@ -7,6 +7,7 @@ import { Log, ApiKey } from '@/components/types';
 import { useClerk } from '@clerk/clerk-react';
 import { Select, SelectItem, SelectContent, SelectTrigger, SelectValue, SelectGroup } from '@/components/ui/select';
 import { useTheme } from 'next-themes';
+import { CHAINID_NETWORK_MAP } from '@/constants/data';
 export default function LogTable() {
   const { user } = useClerk();
   const [data, setData] = useState<Log[]>([]);
@@ -76,7 +77,7 @@ export default function LogTable() {
 
         const formattedData = data.map((item: any) => ({
           id: item.requestId,
-          chain: item.chainId.toString(),
+          chain: CHAINID_NETWORK_MAP[item.chainId as keyof typeof CHAINID_NETWORK_MAP],
           request: JSON.stringify(item.request, null, 2),
           response: JSON.stringify(item.response, null, 2),
           httpCode: item.status,
