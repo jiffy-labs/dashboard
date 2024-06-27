@@ -6,14 +6,31 @@ import { columnsnew } from './columnsnew';
 import { Log, ApiKey } from '@/components/types';
 import { useClerk } from '@clerk/clerk-react';
 import { Select, SelectItem, SelectContent, SelectTrigger, SelectValue, SelectGroup } from '@/components/ui/select';
-
+import { useTheme } from 'next-themes';
 export default function LogTable() {
   const { user } = useClerk();
   const [data, setData] = useState<Log[]>([]);
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
   const [selectedApiKey, setSelectedApiKey] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
+  const [mounted, setMounted] = useState(false)
+  const { theme } = useTheme()
 
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+
+
+  const [imageSrc, setImageSrc] = useState('/loadinglight.gif');
+
+  useEffect(() => {
+    if (theme === 'dark') {
+      setImageSrc('/loadingdark.gif');
+    } else {
+      setImageSrc('/loadinglight.gif');
+    }
+  }, [theme]);
   useEffect(() => {
     const fetchApiKeys = async () => {
       const response = await fetch(`https://api-dev.jiffyscan.xyz/v0/getApiKeys?emailId=${user?.primaryEmailAddress?.emailAddress}`, {
@@ -75,7 +92,7 @@ export default function LogTable() {
       fetchData();
     }
   }, [selectedApiKey]);
-
+  if(!mounted) return null
   return (
     <>
       <div className="flex items-start justify-between flex-row">
@@ -101,7 +118,7 @@ export default function LogTable() {
       </div>
       {isLoading ? (
         <div className="flex justify-center items-center">
-          <img src="/loadingeth.gif" alt="Loading..." className="mt-[15rem]" />
+         <img src={imageSrc } alt="Loading..." className="mt-[15rem]" />
         </div>
       ) : (
         <DataTable2 searchKey="requestName" columns={columnsnew} data={data} />

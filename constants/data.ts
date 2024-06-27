@@ -157,12 +157,12 @@ export const navItems: NavItem[] = [
   },
   
   
-  {
-    title: 'Account',
-    href: '/dashboard/account',
-    icon: 'account',
-    label: 'account'
-  },
+  // {
+  //   title: 'Account',
+  //   href: '/dashboard/account',
+  //   icon: 'account',
+  //   label: 'account'
+  // },
     
   {
     title: 'API Keys',

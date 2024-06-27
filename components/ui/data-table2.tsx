@@ -109,7 +109,7 @@ export function DataTable2({
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  No results.
+                  No Logs yet for this API key.
                 </TableCell>
               </TableRow>
             )}

@@ -9,7 +9,7 @@ import { ApiKey } from '@/components/types';
 import { useUser } from '@clerk/nextjs';
 import { columns } from './columns';
 import { Plus, Check, Copy, Eye, EyeOff } from 'lucide-react';
-
+import { useTheme } from 'next-themes';
 export default function ApiKeysTable() {
   const { user } = useUser();
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
@@ -18,6 +18,25 @@ export default function ApiKeysTable() {
   const [showApiKey, setShowApiKey] = useState(false);
   const [copied, setCopied] = useState(false);
   const [isLoading,setIsLoading] = useState(true)
+  const [mounted, setMounted] = useState(false)
+  const { theme } = useTheme()
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+
+
+  const [imageSrc, setImageSrc] = useState('/loadinglight.gif');
+
+  useEffect(() => {
+    if (theme === 'dark') {
+      setImageSrc('/loadingdark.gif');
+    } else {
+      setImageSrc('/loadinglight.gif');
+    }
+  }, [theme]);
+
   useEffect(() => {
     const fetchApiKeys = async () => {
       const response = await fetch(`https://api-dev.jiffyscan.xyz/v0/getApiKeys?emailId=${user?.primaryEmailAddress?.emailAddress}`, {
@@ -27,7 +46,7 @@ export default function ApiKeysTable() {
       });
       const json = await response.json();
         const data = JSON.parse(json);
-      console.log("api keys fetched", data);
+    //   console.log("api keys fetched", data);
       if (Array.isArray(data)) {
         setApiKeys(data);
         setIsLoading(false)
@@ -59,7 +78,7 @@ export default function ApiKeysTable() {
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
-
+  if(!mounted) return null
   return (
     <div>
       <div className="flex justify-between items-center mb-4">
@@ -107,7 +126,7 @@ export default function ApiKeysTable() {
      
       {isLoading ? (
           <div className="flex justify-center items-center h-full mt-[16rem]">
-            <img src="/loadingeth.gif" alt="Loading..." />
+            <img src={imageSrc} alt="Loading..." />
           </div>
         ) : (
           <DataTable searchKey='name' columns={columns} data={apiKeys} />
