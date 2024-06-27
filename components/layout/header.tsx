@@ -21,7 +21,7 @@ export default function Header() {
 
   useEffect(() => {
     if (theme === 'dark') {
-      setImageSrc('/logo.svg');
+      setImageSrc('/logodark.svg');
     } else {
       setImageSrc('/logolight.svg');
     }
