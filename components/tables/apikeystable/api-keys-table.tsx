@@ -4,12 +4,12 @@ import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { DataTable } from '@/components/ui/data-table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { ApiKey } from '@/components/types';
 import { useUser } from '@clerk/nextjs';
-import { columns } from './columns';
+import { createColumns } from './columns';
 import { Plus, Check, Copy, Eye, EyeOff } from 'lucide-react';
 import { useTheme } from 'next-themes';
+
 export default function ApiKeysTable() {
   const { user } = useUser();
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
@@ -17,15 +17,13 @@ export default function ApiKeysTable() {
   const [newApiKey, setNewApiKey] = useState<{ apiKeyName: string, apiKey: string } | null>(null);
   const [showApiKey, setShowApiKey] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [isLoading,setIsLoading] = useState(true)
-  const [mounted, setMounted] = useState(false)
-  const { theme } = useTheme()
+  const [isLoading, setIsLoading] = useState(true);
+  const [mounted, setMounted] = useState(false);
+  const { theme } = useTheme();
 
   useEffect(() => {
-    setMounted(true)
-  }, [])
-
-
+    setMounted(true);
+  }, []);
 
   const [imageSrc, setImageSrc] = useState('/loadinglight.gif');
 
@@ -39,20 +37,28 @@ export default function ApiKeysTable() {
 
   useEffect(() => {
     const fetchApiKeys = async () => {
-      const response = await fetch(`https://api-dev.jiffyscan.xyz/v0/getApiKeys?emailId=${user?.primaryEmailAddress?.emailAddress}`, {
-        headers: {
-          'x-api-key': 'TestAPIKeyDontUseInCode'
+      try {
+        const response = await fetch(`https://api-dev.jiffyscan.xyz/v0/getApiKeys?emailId=${user?.primaryEmailAddress?.emailAddress}`, {
+          headers: {
+            'x-api-key': 'TestAPIKeyDontUseInCode'
+          }
+        });
+        if (response.ok) {
+          const json = await response.json();
+          const data = JSON.parse(json);
+          if (Array.isArray(data)) {
+            setApiKeys(data);
+          } else {
+            console.error('Data is not an array:', data);
+          }
+        } else {
+          const errorData = await response.json();
+          console.error('Failed to fetch API keys:', errorData);
         }
-      });
-      const json = await response.json();
-        const data = JSON.parse(json);
-    //   console.log("api keys fetched", data);
-      if (Array.isArray(data)) {
-        setApiKeys(data);
-        setIsLoading(false)
-      } else {
-        console.error('Data is not an array:', data);
-        setIsLoading(false)
+      } catch (error) {
+        console.error('Failed to fetch:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -61,16 +67,21 @@ export default function ApiKeysTable() {
 
   const handleCreateApiKey = async () => {
     setIsCreating(true);
-    const response = await fetch(`https://api-dev.jiffyscan.xyz/v0/createApiKeys?emailId=${user?.primaryEmailAddress?.emailAddress}`, {
-      method: 'GET',
-      headers: {
-        'x-api-key': 'TestAPIKeyDontUseInCode'
-      }
-    });
-    const data = await response.json();
-    setNewApiKey(data);
-    setApiKeys([...apiKeys, data]);
-    setIsCreating(false);
+    try {
+      const response = await fetch(`https://api-dev.jiffyscan.xyz/v0/createApiKeys?emailId=${user?.primaryEmailAddress?.emailAddress}`, {
+        method: 'GET',
+        headers: {
+          'x-api-key': 'TestAPIKeyDontUseInCode'
+        }
+      });
+      const data = await response.json();
+      setNewApiKey(data);
+      setApiKeys([...apiKeys, data]);
+    } catch (error) {
+      console.error('Failed to create API key:', error);
+    } finally {
+      setIsCreating(false);
+    }
   };
 
   const handleCopy = (text: string) => {
@@ -78,7 +89,29 @@ export default function ApiKeysTable() {
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
-  if(!mounted) return null
+
+  const deleteApiKey = async (apiKeyData: ApiKey) => {
+    try {
+      const response = await fetch(`https://api.jiffyscan.xyz/v0/deleteApiKey/?emailId=${user?.primaryEmailAddress?.emailAddress}&apiKey=${apiKeyData.api_key}&apiKeyName=${apiKeyData.name}`, {
+        method: 'GET',
+        headers: {
+          'x-api-key': 'TestAPIKeyDontUseInCode'
+        }
+      });
+        // const data = await response.json();
+        if(response.status == 200) {
+          setApiKeys(apiKeys.filter((apiKey) => apiKey.api_key !== apiKeyData.api_key));
+        }
+        else{
+          alert("Something went wrong, please try again later")
+        }
+    } catch (error) {
+      console.error('Failed to fetch:', error);
+    }
+  };
+
+  if (!mounted) return null;
+
   return (
     <div>
       <div className="flex justify-between items-center mb-4">
@@ -93,15 +126,14 @@ export default function ApiKeysTable() {
             <DialogHeader>
               <DialogTitle>Create New API Key</DialogTitle>
             </DialogHeader>
-            {!newApiKey &&(
-                <>
-             <p>Are you sure you want to create a new API key?</p>
-            <Button onClick={handleCreateApiKey} disabled={isCreating}>
-              {isCreating ? 'Creating...' : 'Create'}
-            </Button>
-            </>
-            )
-            }
+            {!newApiKey && (
+              <>
+                <p>Are you sure you want to create a new API key?</p>
+                <Button onClick={handleCreateApiKey} disabled={isCreating}>
+                  {isCreating ? 'Creating...' : 'Create'}
+                </Button>
+              </>
+            )}
             {newApiKey && (
               <div className="mt-4">
                 <p className="font-semibold">API Key Name:</p>
@@ -122,17 +154,14 @@ export default function ApiKeysTable() {
           </DialogContent>
         </Dialog>
       </div>
-     
-     
+
       {isLoading ? (
-          <div className="flex justify-center items-center h-full mt-[16rem]">
-            <img src={imageSrc} alt="Loading..." />
-          </div>
-        ) : (
-          <DataTable searchKey='name' columns={columns} data={apiKeys} />
-        )}
-        
-      
+        <div className="flex justify-center items-center h-full mt-[16rem]">
+          <img src={imageSrc} alt="Loading..." />
+        </div>
+      ) : (
+        <DataTable searchKey="name" columns={createColumns(deleteApiKey)} data={apiKeys} />
+      )}
     </div>
   );
 }
