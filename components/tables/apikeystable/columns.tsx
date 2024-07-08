@@ -31,13 +31,55 @@ const KeySecretCell = ({ apiKey }: { apiKey: string }) => {
   );
 };
 
-const DeleteButton = ({ onDelete }: { onDelete: () => void }) => (
-  <Button variant="ghost" size="sm" onClick={onDelete}>
-    <svg width="14" height="18" viewBox="0 0 14 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M14 1H10.5L9.5 0H4.5L3.5 1H0V3H14M1 16C1 16.5304 1.21071 17.0391 1.58579 17.4142C1.96086 17.7893 2.46957 18 3 18H11C11.5304 18 12.0391 17.7893 12.4142 17.4142C12.7893 17.0391 13 16.5304 13 16V4H1V16Z" fill="#C5221F"/>
-    </svg>
-  </Button>
-);
+const DeleteButton = ({ onDelete }: { onDelete: () => Promise<void> }) => {
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleDelete = async () => {
+    setIsDeleting(true);
+    await onDelete();
+    setIsDeleting(false);
+  };
+
+  return (
+    <Button variant="ghost" size="sm" onClick={handleDelete} disabled={isDeleting}>
+      {isDeleting ? (
+        <svg
+          className="animate-spin h-5 w-5 text-gray-600"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <circle
+            className="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            strokeWidth="4"
+          ></circle>
+          <path
+            className="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8v8H4z"
+          ></path>
+        </svg>
+      ) : (
+        <svg
+          width="14"
+          height="18"
+          viewBox="0 0 14 18"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M14 1H10.5L9.5 0H4.5L3.5 1H0V3H14M1 16C1 16.5304 1.21071 17.0391 1.58579 17.4142C1.96086 17.7893 2.46957 18 3 18H11C11.5304 18 12.0391 17.7893 12.4142 17.4142C12.7893 17.0391 13 16.5304 13 16V4H1V16Z"
+            fill="#C5221F"
+          />
+        </svg>
+      )}
+    </Button>
+  );
+};
 
 export const createColumns = (deleteApiKey: (apiKeyData: ApiKey) => Promise<void>): ColumnDef<ApiKey>[] => [
   {

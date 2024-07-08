@@ -98,13 +98,11 @@ export default function ApiKeysTable() {
           'x-api-key': 'TestAPIKeyDontUseInCode'
         }
       });
-        // const data = await response.json();
-        if(response.status == 200) {
-          setApiKeys(apiKeys.filter((apiKey) => apiKey.api_key !== apiKeyData.api_key));
-        }
-        else{
-          alert("Something went wrong, please try again later")
-        }
+      if (response.status === 200) {
+        setApiKeys(apiKeys.filter((apiKey) => apiKey.api_key !== apiKeyData.api_key));
+      } else {
+        alert("Something went wrong, please try again later");
+      }
     } catch (error) {
       console.error('Failed to fetch:', error);
     }
@@ -136,28 +134,25 @@ export default function ApiKeysTable() {
             )}
             {newApiKey && (
               <div className="mt-4">
-                <p className="font-semibold">API Key Name:</p>
-                <p>{newApiKey.apiKeyName}</p>
-                <p className="font-semibold mt-2">API Key:</p>
-                <div className="flex items-center">
-                  <span className="mr-2">{showApiKey ? newApiKey.apiKey : '**********'}</span>
+                <div className="flex items-center mb-2">
+                  <span className="mr-2">New API Key:</span>
+                  <span className="font-mono">{showApiKey ? newApiKey.apiKey : '*******************************'}</span>
                   <Button variant="ghost" size="sm" onClick={() => setShowApiKey(!showApiKey)}>
                     {showApiKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </Button>
                   <Button variant="ghost" size="sm" onClick={() => handleCopy(newApiKey.apiKey)}>
                     <Copy className="h-4 w-4" />
                   </Button>
-                  {copied && <Check className="h-4 w-4 text-green-600 ml-2" />}
+                  {copied && <span className="text-green-600 ml-2">Copied!</span>}
                 </div>
               </div>
             )}
           </DialogContent>
         </Dialog>
       </div>
-
       {isLoading ? (
-        <div className="flex justify-center items-center h-full mt-[16rem]">
-          <img src={imageSrc} alt="Loading..." />
+        <div className="flex justify-center items-center h-64">
+          <img src={imageSrc} alt="Loading" className="w-12 h-12" />
         </div>
       ) : (
         <DataTable searchKey="name" columns={createColumns(deleteApiKey)} data={apiKeys} />
