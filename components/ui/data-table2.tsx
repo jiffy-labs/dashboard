@@ -1,4 +1,4 @@
-'use client';
+// data-table2.tsx
 
 import {
   ColumnDef,
@@ -52,7 +52,7 @@ export function DataTable2({
         }
         className="w-full md:max-w-sm"
       />
-      <ScrollArea className="h-[calc(80vh-220px)] rounded-md border">
+      <ScrollArea className="h-[calc(80vh-220px)] md:h-auto rounded-md border">
         <Table className="relative">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -93,7 +93,7 @@ export function DataTable2({
                     </TableRow>
                     <CollapsibleContent asChild>
                       <TableRow>
-                        <TableCell colSpan={columns.length}>
+                        <TableCell colSpan={columns.length + 1}>
                           <div className="w-full">
                             <LinksVisitors log={row.original} />
                           </div>
@@ -118,10 +118,6 @@ export function DataTable2({
         <ScrollBar orientation="horizontal" />
       </ScrollArea>
       <div className="flex items-center justify-end space-x-2 py-4">
-        {/* <div className="flex-1 text-sm text-muted-foreground">
-          {table.getFilteredSelectedRowModel().rows.length} of{' '}
-          {table.getFilteredRowModel().rows.length} row(s) selected.
-        </div> */}
         <div className="space-x-2">
           <Button
             variant="outline"
