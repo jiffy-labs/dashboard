@@ -77,12 +77,12 @@ export default function LogTable() {
 
         const formattedData = data.map((item: any) => ({
           id: item.requestId,
-          chain: CHAINID_NETWORK_MAP[item.chainId as keyof typeof CHAINID_NETWORK_MAP],
+          chain: item.chainId === -1 ? 'N/A' : CHAINID_NETWORK_MAP[item.chainId as keyof typeof CHAINID_NETWORK_MAP],
           request: JSON.stringify(item.request, null, 2),
           response: JSON.stringify(item.response, null, 2),
           httpCode: item.status,
           age: item.created_at,
-          requestName: item.request.method,
+          requestName: item.method,
           responseStatus: item.response?.result?.success !== undefined ? (item.response.result.success ? 'Success' : 'Failure') : (item.status === 200 ? 'Success' : 'Failure')
         }));
 
