@@ -37,6 +37,37 @@ export const columns: ColumnDef<ApiKey>[] = [
     header: 'KEY NAME',
   },
   {
+    accessorKey: 'plan',
+    header: 'PLAN',
+    cell: ({ getValue }) => {
+      const plan = getValue<string>();
+      let colorClass = '';
+
+      // Assign colors based on plan
+      switch (plan) {
+        case 'STARTER':
+          colorClass = 'bg-blue-100 text-blue-800';
+          break;
+        case 'DEVELOPER':
+          colorClass = 'bg-green-100 text-green-800';
+          break;
+        case 'PROFESSIONAL':
+          colorClass = 'bg-yellow-100 text-yellow-800';
+          break;
+        case 'ENTERPRISE':
+          colorClass = 'bg-purple-100 text-purple-800';
+          break;
+        default:
+          colorClass = 'bg-gray-100 text-gray-800';
+          break;
+      }
+
+      return (
+        <span className={`text-xs font-medium me-2 px-2.5 py-0.5 rounded border border-gray-500 ${colorClass}`}>{plan}</span>
+      );
+    }
+  },
+  {
     accessorKey: 'api_key',
     header: 'KEY SECRET',
     cell: ({ getValue }) => <KeySecretCell apiKey={getValue<string>()} />,
