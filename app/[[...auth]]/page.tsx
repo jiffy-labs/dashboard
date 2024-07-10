@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { SignIn, SignUp } from '@clerk/nextjs';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function AuthenticationPage() {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -11,7 +12,7 @@ export default function AuthenticationPage() {
       <div className="relative hidden h-full flex-col bg-muted p-10 text-white lg:flex dark:border-r">
         <div className="absolute inset-0 bg-zinc-900" />
         <div className="relative z-20 flex items-center text-lg font-medium">
-        <img src={`/logo.svg`} className='h-[40px] w-[180px]' />
+        <Image alt="" src={`/logo.svg`} height={40} width={180} />
       
         </div>
         <div className="relative z-20 mt-auto">

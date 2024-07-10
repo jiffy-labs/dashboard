@@ -8,6 +8,7 @@ import { useClerk } from '@clerk/clerk-react';
 import { Select, SelectItem, SelectContent, SelectTrigger, SelectValue, SelectGroup } from '@/components/ui/select';
 import { useTheme } from 'next-themes';
 import { CHAINID_NETWORK_MAP } from '@/constants/data';
+import EmptyState from '@/components/ui/empty-state';
 export default function LogTable() {
   const { user } = useClerk();
   const [data, setData] = useState<Log[]>([]);
@@ -119,7 +120,7 @@ export default function LogTable() {
       </div>
       {isLoading ? (
         <div className="flex justify-center items-center">
-         <img src={imageSrc } alt="Loading..." className="mt-[15rem]" />
+         <EmptyState />
         </div>
       ) : (
         <DataTable2 searchKey="requestName" columns={columnsnew} data={data} />
