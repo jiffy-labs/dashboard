@@ -92,7 +92,7 @@ export default function ApiKeysTable() {
 
   const deleteApiKey = async (apiKeyData: ApiKey) => {
     try {
-      const response = await fetch(`https://api.jiffyscan.xyz/v0/deleteApiKey/?emailId=${user?.primaryEmailAddress?.emailAddress}&apiKey=${apiKeyData.api_key}&apiKeyName=${apiKeyData.name}`, {
+      const response = await fetch(`https://api-dev.jiffyscan.xyz/v0/deleteApiKey/?emailId=${user?.primaryEmailAddress?.emailAddress}&apiKey=${apiKeyData.api_key}&apiKeyName=${apiKeyData.name}`, {
         method: 'GET',
         headers: {
           'x-api-key': 'TestAPIKeyDontUseInCode'

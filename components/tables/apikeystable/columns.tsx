@@ -1,11 +1,11 @@
-'use client';
 
 import { ColumnDef } from '@tanstack/react-table';
 import { EyeIcon, EyeOffIcon, CopyIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import { ApiKey } from '@/components/types';
-import formatDistanceToNow from 'date-fns/formatDistanceToNow';
+import parseISO from 'date-fns/parseISO';
+import format from 'date-fns/format';
 
 const KeySecretCell = ({ apiKey }: { apiKey: string }) => {
   const [show, setShow] = useState(false);
@@ -102,8 +102,13 @@ export const createColumns = (deleteApiKey: (apiKeyData: ApiKey) => Promise<void
     accessorKey: 'created_at',
     header: 'AGE',
     cell: ({ getValue }) => {
-      const date = new Date(getValue<string>());
-      return <span>{formatDistanceToNow(date, { addSuffix: true })}</span>;
-    },
+      try {
+        const date = parseISO(getValue<string>());
+        return <span>{format(date, 'yyyy-MM-dd HH:mm:ss')}</span>; // Display in your desired local format
+      } catch (error) {
+        console.error('Error parsing date:', error);
+        return <span>Error</span>; // Or handle it gracefully as per your application's needs
+      }
+    }
   }
 ];
