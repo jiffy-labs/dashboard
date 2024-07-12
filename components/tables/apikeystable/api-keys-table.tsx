@@ -67,6 +67,15 @@ export default function ApiKeysTable() {
 
   const handleCreateApiKey = async () => {
     setIsCreating(true);
+
+    // Check for existing STARTER plan API key
+    const hasStarterPlan = apiKeys.some(key => key.plan === 'STARTER');
+
+    if (hasStarterPlan) {
+      setIsCreating(false);
+      return;
+    }
+
     try {
       const response = await fetch(`https://api-dev.jiffyscan.xyz/v0/createApiKeys?emailId=${user?.primaryEmailAddress?.emailAddress}`, {
         method: 'GET',
@@ -110,6 +119,9 @@ export default function ApiKeysTable() {
 
   if (!mounted) return null;
 
+  // Check for existing STARTER plan API key
+  const hasStarterPlan = apiKeys.some(key => key.plan === 'STARTER');
+
   return (
     <div>
       <div className="flex justify-between items-center mb-4">
@@ -122,17 +134,21 @@ export default function ApiKeysTable() {
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Create New API Key</DialogTitle>
+              <DialogTitle>{hasStarterPlan ? 'API Key Creation Restricted' : 'Create New API Key'}</DialogTitle>
             </DialogHeader>
-            {!newApiKey && (
+            {hasStarterPlan ? (
+              <div>
+                <p>You already have an API key for the STARTER plan. Please upgrade to create one more API key.</p>
+                {/* <Button onClick={() => setIsCreating(false)}>Close</Button> */}
+              </div>
+            ) : !newApiKey ? (
               <>
                 <p>Are you sure you want to create a new API key?</p>
                 <Button onClick={handleCreateApiKey} disabled={isCreating}>
                   {isCreating ? 'Creating...' : 'Create'}
                 </Button>
               </>
-            )}
-            {newApiKey && (
+            ) : (
               <div className="mt-4">
                 <div className="flex items-center mb-2">
                   <span className="mr-2">New API Key:</span>
