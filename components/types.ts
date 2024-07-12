@@ -17,6 +17,7 @@ export interface ResponseData {
 }
 
 export interface ApiKey {
+  plan: string;
   api_key: string;
   name: string;
   created_at: string;
