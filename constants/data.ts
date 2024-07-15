@@ -171,6 +171,13 @@ export const navItems: NavItem[] = [
     label: 'apikeys'
   },
 
+  {
+    title: 'Metrics',
+    href: '/dashboard/metrics',
+    icon: 'apikeys',
+    label: 'apikeys'
+  },
+
  
 ];
 
