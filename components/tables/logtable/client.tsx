@@ -98,7 +98,7 @@ export default function LogTable() {
   return (
     <>
       <div className="flex items-start justify-between flex-row">
-        <h1>API Request Logs</h1>
+        <h1></h1>
         <div>
           {apiKeys.length > 0 && (
             <Select onValueChange={setSelectedApiKey} defaultValue={selectedApiKey}>
