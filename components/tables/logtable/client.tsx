@@ -14,6 +14,7 @@ export default function LogTable() {
   const [data, setData] = useState<Log[]>([]);
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
   const [selectedApiKey, setSelectedApiKey] = useState<string>('');
+  const [statusFilter, setStatusFilter] = useState<string>('All'); // New state for status filter
   const [isLoading, setIsLoading] = useState(true);
   const [mounted, setMounted] = useState(false)
   const { theme } = useTheme()
@@ -37,7 +38,7 @@ export default function LogTable() {
     const fetchApiKeys = async () => {
       const response = await fetch(`https://api-dev.jiffyscan.xyz/v0/getApiKeys?emailId=${user?.primaryEmailAddress?.emailAddress}`, {
         headers: {
-          'x-api-key': 'TestAPIKeyDontUseInCode'
+          'x-api-key': 'gFQghtJC6F734nPaUYK8M3ggf9TOpojkbNTH9gR5'
         }
       });
 
@@ -71,7 +72,7 @@ export default function LogTable() {
         setIsLoading(true);
         const response = await fetch(`https://api-dev.jiffyscan.xyz/v0/getApiKeyLogs?limit=10&page=0&skip=0&apiKey=${selectedApiKey}`, {
           headers: {
-            'x-api-key': 'TestAPIKeyDontUseInCode'
+            'x-api-key': 'gFQghtJC6F734nPaUYK8M3ggf9TOpojkbNTH9gR5'
           }
         });
 
@@ -88,18 +89,35 @@ export default function LogTable() {
           responseStatus: item.response?.result?.success !== undefined ? (item.response.result.success ? 'Success' : 'Failure') : (item.status === 200 ? 'Success' : 'Failure')
         }));
 
-        setData(formattedData);
+        // Apply status filter
+        const filteredData = statusFilter === 'All' ? formattedData : formattedData.filter((item: { responseStatus: string; }) => item.responseStatus === statusFilter);
+
+        setData(filteredData);
         setIsLoading(false);
       };
 
       fetchData();
     }
-  }, [selectedApiKey]);
+  }, [selectedApiKey, statusFilter]);
   if(!mounted) return null
   return (
     <>
       <div className="flex items-start justify-between flex-row">
-        <h1>API Request Logs</h1>
+        <div className="w-full md:w-auto">
+        <Select onValueChange={setStatusFilter} defaultValue="All">
+            <SelectTrigger>
+              <SelectValue placeholder="Select Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectItem value="All">All</SelectItem>
+                <SelectItem value="Success">Success</SelectItem>
+                <SelectItem value="Failure">Failure</SelectItem>
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
+      
         <div>
           {apiKeys.length > 0 && (
             <Select onValueChange={setSelectedApiKey} defaultValue={selectedApiKey}>

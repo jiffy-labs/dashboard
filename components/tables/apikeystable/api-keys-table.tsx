@@ -80,7 +80,7 @@ export default function ApiKeysTable() {
       const response = await fetch(`https://api-dev.jiffyscan.xyz/v0/createApiKeys?emailId=${user?.primaryEmailAddress?.emailAddress}`, {
         method: 'GET',
         headers: {
-          'x-api-key': 'TestAPIKeyDontUseInCode'
+          'x-api-key': 'gFQghtJC6F734nPaUYK8M3ggf9TOpojkbNTH9gR5'
         }
       });
       const data = await response.json();
@@ -104,7 +104,7 @@ export default function ApiKeysTable() {
       const response = await fetch(`https://api-dev.jiffyscan.xyz/v0/deleteApiKey/?emailId=${user?.primaryEmailAddress?.emailAddress}&apiKey=${apiKeyData.api_key}&apiKeyName=${apiKeyData.name}`, {
         method: 'GET',
         headers: {
-          'x-api-key': 'TestAPIKeyDontUseInCode'
+          'x-api-key': 'gFQghtJC6F734nPaUYK8M3ggf9TOpojkbNTH9gR5'
         }
       });
       if (response.status === 200) {
