@@ -171,7 +171,12 @@ export const navItems: NavItem[] = [
     label: 'apikeys'
   },
 
- 
+  {
+    title: 'Metrics',
+    href: '/dashboard/metrics',
+    icon: 'graph',
+    label: 'Metrics'
+  },
 ];
 
 export const CHAINID_NETWORK_MAP = {

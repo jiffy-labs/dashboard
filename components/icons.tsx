@@ -1,6 +1,7 @@
 import {
   AlertTriangle,
   ArrowRight,
+  BarChartIcon, // Import the graph icon
   Check,
   ChevronLeft,
   ChevronRight,
@@ -33,12 +34,11 @@ import {
 
 export type Icon = LucideIcon;
 
-
 const loadSvgIcon = (path: string) => {
   const SvgIcon = (props: React.ImgHTMLAttributes<HTMLImageElement>) => (
     <img src={path} {...props} alt="" />
   );
-  
+
   SvgIcon.displayName = `SvgIcon(${path})`;
 
   return SvgIcon;
@@ -91,5 +91,6 @@ export const Icons = {
     </svg>
   ),
   twitter: Twitter,
-  check: Check
+  check: Check,
+  graph: BarChartIcon // Add the graph icon here
 };

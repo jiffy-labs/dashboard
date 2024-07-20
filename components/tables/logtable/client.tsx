@@ -8,6 +8,7 @@ import { useClerk } from '@clerk/clerk-react';
 import { Select, SelectItem, SelectContent, SelectTrigger, SelectValue, SelectGroup } from '@/components/ui/select';
 import { useTheme } from 'next-themes';
 import { CHAINID_NETWORK_MAP } from '@/constants/data';
+import EmptyState from '@/components/ui/empty-state';
 export default function LogTable() {
   const { user } = useClerk();
   const [data, setData] = useState<Log[]>([]);
@@ -47,6 +48,7 @@ export default function LogTable() {
           api_key: item.api_key,
           email_id: item.email_id,
           name: item.name,
+          plan: item.plan,
           created_at: item.created_at,
           updated_at: item.updated_at,
         }));
@@ -97,7 +99,7 @@ export default function LogTable() {
   return (
     <>
       <div className="flex items-start justify-between flex-row">
-        <h1>API Request Logs</h1>
+        <h1></h1>
         <div>
           {apiKeys.length > 0 && (
             <Select onValueChange={setSelectedApiKey} defaultValue={selectedApiKey}>
@@ -119,7 +121,7 @@ export default function LogTable() {
       </div>
       {isLoading ? (
         <div className="flex justify-center items-center">
-         <img src={imageSrc } alt="Loading..." className="mt-[15rem]" />
+         <EmptyState />
         </div>
       ) : (
         <DataTable2 searchKey="requestName" columns={columnsnew} data={data} />
