@@ -48,6 +48,7 @@ export default function LogTable() {
           api_key: item.api_key,
           email_id: item.email_id,
           name: item.name,
+          plan: item.plan,
           created_at: item.created_at,
           updated_at: item.updated_at,
         }));
