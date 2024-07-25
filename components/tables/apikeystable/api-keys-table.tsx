@@ -10,6 +10,23 @@ import { createColumns } from './columns';
 import { Plus, Check, Copy, Eye, EyeOff } from 'lucide-react';
 import { useTheme } from 'next-themes';
 
+const fetchWithTimeout = async (url: string, options: RequestInit = {}, timeout: number = 5000) => {
+  const controller = new AbortController();
+  const { signal } = controller;
+
+  const fetchPromise = fetch(url, { ...options, signal });
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+  try {
+    const response = await fetchPromise;
+    clearTimeout(timeoutId);
+    return response;
+  } catch (error) {
+    clearTimeout(timeoutId);
+    throw error;
+  }
+};
+
 export default function ApiKeysTable() {
   const { user } = useUser();
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
@@ -36,11 +53,16 @@ export default function ApiKeysTable() {
     }
   }, [theme]);
 
+  const apiUrl = process.env.NODE_ENV === 'production'
+    ? process.env.NEXT_PUBLIC_API_URL_PROD
+    : process.env.NEXT_PUBLIC_API_URL_DEV;
+  const apiKey = process.env.NEXT_PUBLIC_API_KEY ?? 'TestAPIKeyDontUseInCode';
+
   const fetchApiKeys = async () => {
     try {
-      const response = await fetch(`https://api-dev.jiffyscan.xyz/v0/getApiKeys?emailId=${user?.primaryEmailAddress?.emailAddress}`, {
+      const response = await fetchWithTimeout(`${apiUrl}/v0/getApiKeys?emailId=${user?.primaryEmailAddress?.emailAddress}`, {
         headers: {
-          'x-api-key': 'gFQghtJC6F734nPaUYK8M3ggf9TOpojkbNTH9gR5'
+          'x-api-key': apiKey
         }
       });
       if (response.ok) {
@@ -77,10 +99,10 @@ export default function ApiKeysTable() {
     }
 
     try {
-      const response = await fetch(`https://api-dev.jiffyscan.xyz/v0/createApiKeys?emailId=${user?.primaryEmailAddress?.emailAddress}`, {
+      const response = await fetchWithTimeout(`${apiUrl}/v0/createApiKeys?emailId=${user?.primaryEmailAddress?.emailAddress}`, {
         method: 'GET',
         headers: {
-          'x-api-key': 'gFQghtJC6F734nPaUYK8M3ggf9TOpojkbNTH9gR5'
+          'x-api-key': apiKey
         }
       });
       const data = await response.json();
@@ -103,10 +125,10 @@ export default function ApiKeysTable() {
 
   const deleteApiKey = async (apiKeyData: ApiKey) => {
     try {
-      const response = await fetch(`https://api-dev.jiffyscan.xyz/v0/deleteApiKey/?emailId=${user?.primaryEmailAddress?.emailAddress}&apiKey=${apiKeyData.api_key}&apiKeyName=${apiKeyData.name}`, {
+      const response = await fetchWithTimeout(`${apiUrl}/v0/deleteApiKey/?emailId=${user?.primaryEmailAddress?.emailAddress}&apiKey=${apiKeyData.api_key}&apiKeyName=${apiKeyData.name}`, {
         method: 'GET',
         headers: {
-          'x-api-key': 'gFQghtJC6F734nPaUYK8M3ggf9TOpojkbNTH9gR5'
+          'x-api-key': apiKey
         }
       });
       if (response.status === 200) {
@@ -116,12 +138,8 @@ export default function ApiKeysTable() {
         alert("Something went wrong, please try again later");
       }
     } catch (error) {
-      console.error('Failed to fetch:', error);
+      console.error('Failed to delete API key:', error);
     }
-    // finally{
-    //   setIsDialogOpen(false);  // Close the dialog box
-    //   fetchApiKeys(); 
-    // }
   };
 
   if (!mounted) return null;
@@ -181,3 +199,4 @@ export default function ApiKeysTable() {
     </div>
   );
 }
+
