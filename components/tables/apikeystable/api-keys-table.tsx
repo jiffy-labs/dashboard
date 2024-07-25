@@ -19,6 +19,7 @@ export default function ApiKeysTable() {
   const [copied, setCopied] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { theme } = useTheme();
 
   useEffect(() => {
@@ -35,40 +36,39 @@ export default function ApiKeysTable() {
     }
   }, [theme]);
 
-  useEffect(() => {
-    const fetchApiKeys = async () => {
-      try {
-        const response = await fetch(`https://api-dev.jiffyscan.xyz/v0/getApiKeys?emailId=${user?.primaryEmailAddress?.emailAddress}`, {
-          headers: {
-            'x-api-key': 'TestAPIKeyDontUseInCode'
-          }
-        });
-        if (response.ok) {
-          const json = await response.json();
-          const data = JSON.parse(json);
-          if (Array.isArray(data)) {
-            setApiKeys(data);
-          } else {
-            console.error('Data is not an array:', data);
-          }
-        } else {
-          const errorData = await response.json();
-          console.error('Failed to fetch API keys:', errorData);
+  const fetchApiKeys = async () => {
+    try {
+      const response = await fetch(`https://api-dev.jiffyscan.xyz/v0/getApiKeys?emailId=${user?.primaryEmailAddress?.emailAddress}`, {
+        headers: {
+          'x-api-key': 'gFQghtJC6F734nPaUYK8M3ggf9TOpojkbNTH9gR5'
         }
-      } catch (error) {
-        console.error('Failed to fetch:', error);
-      } finally {
-        setIsLoading(false);
+      });
+      if (response.ok) {
+        const json = await response.json();
+        const data = JSON.parse(json);
+        if (Array.isArray(data)) {
+          setApiKeys(data);
+        } else {
+          console.error('Data is not an array:', data);
+        }
+      } else {
+        const errorData = await response.json();
+        console.error('Failed to fetch API keys:', errorData);
       }
-    };
+    } catch (error) {
+      console.error('Failed to fetch:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchApiKeys();
   }, [user]);
 
   const handleCreateApiKey = async () => {
     setIsCreating(true);
 
-    // Check for existing STARTER plan API key
     const hasStarterPlan = apiKeys.some(key => key.plan === 'STARTER');
 
     if (hasStarterPlan) {
@@ -90,6 +90,8 @@ export default function ApiKeysTable() {
       console.error('Failed to create API key:', error);
     } finally {
       setIsCreating(false);
+      setIsDialogOpen(false);  // Close the dialog box
+      fetchApiKeys();  // Refresh the API keys list
     }
   };
 
@@ -109,26 +111,30 @@ export default function ApiKeysTable() {
       });
       if (response.status === 200) {
         setApiKeys(apiKeys.filter((apiKey) => apiKey.api_key !== apiKeyData.api_key));
+        setNewApiKey(null);
       } else {
         alert("Something went wrong, please try again later");
       }
     } catch (error) {
       console.error('Failed to fetch:', error);
     }
+    // finally{
+    //   setIsDialogOpen(false);  // Close the dialog box
+    //   fetchApiKeys(); 
+    // }
   };
 
   if (!mounted) return null;
 
-  // Check for existing STARTER plan API key
   const hasStarterPlan = apiKeys.some(key => key.plan === 'STARTER');
 
   return (
     <div>
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-xl font-semibold">API Keys List</h1>
-        <Dialog>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button>
+            <Button onClick={() => setIsDialogOpen(true)}>
               <Plus className="mr-2" /> Create API Key
             </Button>
           </DialogTrigger>
@@ -139,7 +145,6 @@ export default function ApiKeysTable() {
             {hasStarterPlan ? (
               <div>
                 <p>You already have an API key for the STARTER plan. Please upgrade to create one more API key.</p>
-                {/* <Button onClick={() => setIsCreating(false)}>Close</Button> */}
               </div>
             ) : !newApiKey ? (
               <>
