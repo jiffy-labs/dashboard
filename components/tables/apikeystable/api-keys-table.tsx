@@ -10,6 +10,23 @@ import { createColumns } from './columns';
 import { Plus, Check, Copy, Eye, EyeOff } from 'lucide-react';
 import { useTheme } from 'next-themes';
 
+const fetchWithTimeout = async (url: string, options: RequestInit = {}, timeout: number = 5000) => {
+  const controller = new AbortController();
+  const { signal } = controller;
+
+  const fetchPromise = fetch(url, { ...options, signal });
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+  try {
+    const response = await fetchPromise;
+    clearTimeout(timeoutId);
+    return response;
+  } catch (error) {
+    clearTimeout(timeoutId);
+    throw error;
+  }
+};
+
 export default function ApiKeysTable() {
   const { user } = useUser();
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
@@ -19,6 +36,7 @@ export default function ApiKeysTable() {
   const [copied, setCopied] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { theme } = useTheme();
 
   useEffect(() => {
@@ -35,40 +53,44 @@ export default function ApiKeysTable() {
     }
   }, [theme]);
 
-  useEffect(() => {
-    const fetchApiKeys = async () => {
-      try {
-        const response = await fetch(`https://api-dev.jiffyscan.xyz/v0/getApiKeys?emailId=${user?.primaryEmailAddress?.emailAddress}`, {
-          headers: {
-            'x-api-key': 'TestAPIKeyDontUseInCode'
-          }
-        });
-        if (response.ok) {
-          const json = await response.json();
-          const data = JSON.parse(json);
-          if (Array.isArray(data)) {
-            setApiKeys(data);
-          } else {
-            console.error('Data is not an array:', data);
-          }
-        } else {
-          const errorData = await response.json();
-          console.error('Failed to fetch API keys:', errorData);
-        }
-      } catch (error) {
-        console.error('Failed to fetch:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  const apiUrl = process.env.NODE_ENV === 'production'
+    ? process.env.NEXT_PUBLIC_API_URL_PROD
+    : process.env.NEXT_PUBLIC_API_URL_DEV;
+  const apiKey = process.env.NEXT_PUBLIC_API_KEY ?? 'TestAPIKeyDontUseInCode';
 
+  const fetchApiKeys = async () => {
+    try {
+      const response = await fetchWithTimeout(`${apiUrl}/v0/getApiKeys?emailId=${user?.primaryEmailAddress?.emailAddress}`, {
+        headers: {
+          'x-api-key': apiKey
+        }
+      });
+      if (response.ok) {
+        const json = await response.json();
+        const data = JSON.parse(json);
+        if (Array.isArray(data)) {
+          setApiKeys(data);
+        } else {
+          console.error('Data is not an array:', data);
+        }
+      } else {
+        const errorData = await response.json();
+        console.error('Failed to fetch API keys:', errorData);
+      }
+    } catch (error) {
+      console.error('Failed to fetch:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchApiKeys();
   }, [user]);
 
   const handleCreateApiKey = async () => {
     setIsCreating(true);
 
-    // Check for existing STARTER plan API key
     const hasStarterPlan = apiKeys.some(key => key.plan === 'STARTER');
 
     if (hasStarterPlan) {
@@ -77,10 +99,10 @@ export default function ApiKeysTable() {
     }
 
     try {
-      const response = await fetch(`https://api-dev.jiffyscan.xyz/v0/createApiKeys?emailId=${user?.primaryEmailAddress?.emailAddress}`, {
+      const response = await fetchWithTimeout(`${apiUrl}/v0/createApiKeys?emailId=${user?.primaryEmailAddress?.emailAddress}`, {
         method: 'GET',
         headers: {
-          'x-api-key': 'TestAPIKeyDontUseInCode'
+          'x-api-key': apiKey
         }
       });
       const data = await response.json();
@@ -90,6 +112,8 @@ export default function ApiKeysTable() {
       console.error('Failed to create API key:', error);
     } finally {
       setIsCreating(false);
+      setIsDialogOpen(false);  // Close the dialog box
+      fetchApiKeys();  // Refresh the API keys list
     }
   };
 
@@ -101,34 +125,34 @@ export default function ApiKeysTable() {
 
   const deleteApiKey = async (apiKeyData: ApiKey) => {
     try {
-      const response = await fetch(`https://api-dev.jiffyscan.xyz/v0/deleteApiKey/?emailId=${user?.primaryEmailAddress?.emailAddress}&apiKey=${apiKeyData.api_key}&apiKeyName=${apiKeyData.name}`, {
+      const response = await fetchWithTimeout(`${apiUrl}/v0/deleteApiKey/?emailId=${user?.primaryEmailAddress?.emailAddress}&apiKey=${apiKeyData.api_key}&apiKeyName=${apiKeyData.name}`, {
         method: 'GET',
         headers: {
-          'x-api-key': 'TestAPIKeyDontUseInCode'
+          'x-api-key': apiKey
         }
       });
       if (response.status === 200) {
         setApiKeys(apiKeys.filter((apiKey) => apiKey.api_key !== apiKeyData.api_key));
+        setNewApiKey(null);
       } else {
         alert("Something went wrong, please try again later");
       }
     } catch (error) {
-      console.error('Failed to fetch:', error);
+      console.error('Failed to delete API key:', error);
     }
   };
 
   if (!mounted) return null;
 
-  // Check for existing STARTER plan API key
   const hasStarterPlan = apiKeys.some(key => key.plan === 'STARTER');
 
   return (
     <div>
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-xl font-semibold">API Keys List</h1>
-        <Dialog>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button>
+            <Button onClick={() => setIsDialogOpen(true)}>
               <Plus className="mr-2" /> Create API Key
             </Button>
           </DialogTrigger>
@@ -139,7 +163,6 @@ export default function ApiKeysTable() {
             {hasStarterPlan ? (
               <div>
                 <p>You already have an API key for the STARTER plan. Please upgrade to create one more API key.</p>
-                {/* <Button onClick={() => setIsCreating(false)}>Close</Button> */}
               </div>
             ) : !newApiKey ? (
               <>
@@ -176,3 +199,4 @@ export default function ApiKeysTable() {
     </div>
   );
 }
+
