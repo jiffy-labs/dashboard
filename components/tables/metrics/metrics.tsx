@@ -1,4 +1,4 @@
-"use client"
+'use client';
 import React, { useState, useEffect } from 'react';
 import BarChart from './BarChart';
 import axios from 'axios';
@@ -12,19 +12,25 @@ const Metrics: React.FC = () => {
   const [selectedApiKey, setSelectedApiKey] = useState<string>('');
   const [filter, setFilter] = useState<'7days' | '30days'>('7days');
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
-  const [chartData, setChartData] = useState<{ labels: string[], datasets: any[] }>({
+  const [chartData, setChartData] = useState<{
+    labels: string[];
+    datasets: any[];
+  }>({
     labels: [],
-    datasets: [],
+    datasets: []
   });
 
   useEffect(() => {
     const fetchApiKeys = async () => {
       try {
-        const response = await fetch(`https://api-dev.jiffyscan.xyz/v0/getApiKeys?emailId=${user?.primaryEmailAddress?.emailAddress}`, {
-          headers: {
-            'x-api-key': 'TestAPIKeyDontUseInCode'
+        const response = await fetch(
+          `https://api-dev.jiffyscan.xyz/v0/getApiKeys?emailId=${user?.primaryEmailAddress?.emailAddress}`,
+          {
+            headers: {
+              'x-api-key': 'TestApiKeyOnlyUseDashboardForProd'
+            }
           }
-        });
+        );
         if (response.ok) {
           const json = await response.json();
           const data = JSON.parse(json);
@@ -65,30 +71,40 @@ const Metrics: React.FC = () => {
 
     const fetchData = async () => {
       try {
-        const response = await axios.get(`https://api-dev.jiffyscan.xyz/v0/getApiKeyUsage?apiKeyName=${api_name}&dateRange=${filter === '7days' ? 7 : 30}`, {
-          headers: {
-            'x-api-key': api_key
+        const response = await axios.get(
+          `https://api-dev.jiffyscan.xyz/v0/getApiKeyUsage?apiKeyName=${api_name}&dateRange=${
+            filter === '7days' ? 7 : 30
+          }`,
+          {
+            headers: {
+              'x-api-key': api_key
+            }
           }
-        });
+        );
 
         const data = response.data;
 
         const startDate = parseISO(data.startDate);
-        const labels = data.items.map((_: any, index: number) => format(addDays(startDate, index), 'yyyy-MM-dd'));
+        const labels = data.items.map((_: any, index: number) =>
+          format(addDays(startDate, index), 'yyyy-MM-dd')
+        );
 
-        const datasets = [{
-          label: 'Credits Consumed',
-          data: data.items.map((item: any) => item[0]),
-          backgroundColor: 'rgba(75, 192, 192, 0.2)',
-          borderColor: 'rgba(75, 192, 192, 1)',
-          borderWidth: 1,
-        }, {
-          label: 'Credits Left',
-          data: data.items.map((item: any) => item[1]),
-          backgroundColor: 'rgba(192, 75, 192, 0.2)',
-          borderColor: 'rgba(192, 75, 192, 1)',
-          borderWidth: 1,
-        }];
+        const datasets = [
+          {
+            label: 'Credits Consumed',
+            data: data.items.map((item: any) => item[0]),
+            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+            borderColor: 'rgba(75, 192, 192, 1)',
+            borderWidth: 1
+          },
+          {
+            label: 'Credits Left',
+            data: data.items.map((item: any) => item[1]),
+            backgroundColor: 'rgba(192, 75, 192, 0.2)',
+            borderColor: 'rgba(192, 75, 192, 1)',
+            borderWidth: 1
+          }
+        ];
 
         setChartData({ labels, datasets });
       } catch (error) {
@@ -101,29 +117,34 @@ const Metrics: React.FC = () => {
   }, [filter, selectedApiKey]);
 
   return (
-    <div className="p-6 md:p-10 bg-gray-50 dark:bg-gray-900 min-h-screen">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl md:text-4xl font-bold text-gray-800 dark:text-gray-200">Daily Requests</h2>
+    <div className="min-h-screen bg-gray-50 p-6 dark:bg-gray-900 md:p-10">
+      <div className="mb-6 flex items-center justify-between">
+        <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200 md:text-4xl">
+          Daily Requests
+        </h2>
       </div>
-      <div className="flex xs:flex-col lg:justify-between mb-8 gap-2">
+      <div className="xs:flex-col mb-8 flex gap-2 lg:justify-between">
         <select
-          className="px-4 py-2 rounded-lg font-medium bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300 focus:outline-none"
+          className="rounded-lg bg-gray-200 px-4 py-2 font-medium text-gray-700 focus:outline-none dark:bg-gray-700 dark:text-gray-300"
           value={filter}
           onChange={(e) => setFilter(e.target.value as '7days' | '30days')}
         >
           <option value="7days">Last 7 Days</option>
           <option value="30days">Last 30 Days</option>
         </select>
-        <div className=''>
+        <div className="">
           {apiKeys.length > 0 && (
             <select
-              className="w-full px-4 py-2 rounded-lg font-medium bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300 focus:outline-none"
+              className="w-full rounded-lg bg-gray-200 px-4 py-2 font-medium text-gray-700 focus:outline-none dark:bg-gray-700 dark:text-gray-300"
               value={selectedApiKey}
               onChange={(e) => setSelectedApiKey(e.target.value)}
             >
               <option value="">Select an API Key</option>
               {apiKeys.map((apiKey) => (
-                <option key={apiKey.api_key} value={`${apiKey.api_key}|${apiKey.name}`}>
+                <option
+                  key={apiKey.api_key}
+                  value={`${apiKey.api_key}|${apiKey.name}`}
+                >
                   {apiKey.name}
                 </option>
               ))}
@@ -131,7 +152,7 @@ const Metrics: React.FC = () => {
           )}
         </div>
       </div>
-      <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg">
+      <div className="rounded-lg bg-white p-4 shadow-lg dark:bg-gray-800">
         <BarChart data={chartData} />
       </div>
     </div>

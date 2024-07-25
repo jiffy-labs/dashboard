@@ -3,14 +3,24 @@
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { DataTable } from '@/components/ui/data-table';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger
+} from '@/components/ui/dialog';
 import { ApiKey } from '@/components/types';
 import { useUser } from '@clerk/nextjs';
 import { createColumns } from './columns';
 import { Plus, Check, Copy, Eye, EyeOff } from 'lucide-react';
 import { useTheme } from 'next-themes';
 
-const fetchWithTimeout = async (url: string, options: RequestInit = {}, timeout: number = 5000) => {
+const fetchWithTimeout = async (
+  url: string,
+  options: RequestInit = {},
+  timeout: number = 5000
+) => {
   const controller = new AbortController();
   const { signal } = controller;
 
@@ -31,7 +41,10 @@ export default function ApiKeysTable() {
   const { user } = useUser();
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
   const [isCreating, setIsCreating] = useState(false);
-  const [newApiKey, setNewApiKey] = useState<{ apiKeyName: string, apiKey: string } | null>(null);
+  const [newApiKey, setNewApiKey] = useState<{
+    apiKeyName: string;
+    apiKey: string;
+  } | null>(null);
   const [showApiKey, setShowApiKey] = useState(false);
   const [copied, setCopied] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -53,18 +66,23 @@ export default function ApiKeysTable() {
     }
   }, [theme]);
 
-  const apiUrl = process.env.NODE_ENV === 'production'
-    ? process.env.NEXT_PUBLIC_API_URL_PROD
-    : process.env.NEXT_PUBLIC_API_URL_DEV;
-  const apiKey = process.env.NEXT_PUBLIC_API_KEY ?? 'TestAPIKeyDontUseInCode';
+  const apiUrl =
+    process.env.NODE_ENV === 'production'
+      ? process.env.NEXT_PUBLIC_API_URL_PROD
+      : process.env.NEXT_PUBLIC_API_URL_DEV;
+  const apiKey =
+    process.env.NEXT_PUBLIC_API_KEY ?? 'TestApiKeyOnlyUseDashboardForProd';
 
   const fetchApiKeys = async () => {
     try {
-      const response = await fetchWithTimeout(`${apiUrl}/v0/getApiKeys?emailId=${user?.primaryEmailAddress?.emailAddress}`, {
-        headers: {
-          'x-api-key': apiKey
+      const response = await fetchWithTimeout(
+        `${apiUrl}/v0/getApiKeys?emailId=${user?.primaryEmailAddress?.emailAddress}`,
+        {
+          headers: {
+            'x-api-key': apiKey
+          }
         }
-      });
+      );
       if (response.ok) {
         const json = await response.json();
         const data = JSON.parse(json);
@@ -91,7 +109,7 @@ export default function ApiKeysTable() {
   const handleCreateApiKey = async () => {
     setIsCreating(true);
 
-    const hasStarterPlan = apiKeys.some(key => key.plan === 'STARTER');
+    const hasStarterPlan = apiKeys.some((key) => key.plan === 'STARTER');
 
     if (hasStarterPlan) {
       setIsCreating(false);
@@ -99,12 +117,15 @@ export default function ApiKeysTable() {
     }
 
     try {
-      const response = await fetchWithTimeout(`${apiUrl}/v0/createApiKeys?emailId=${user?.primaryEmailAddress?.emailAddress}`, {
-        method: 'GET',
-        headers: {
-          'x-api-key': apiKey
+      const response = await fetchWithTimeout(
+        `${apiUrl}/v0/createApiKeys?emailId=${user?.primaryEmailAddress?.emailAddress}`,
+        {
+          method: 'GET',
+          headers: {
+            'x-api-key': apiKey
+          }
         }
-      });
+      );
       const data = await response.json();
       setNewApiKey(data);
       setApiKeys([...apiKeys, data]);
@@ -112,8 +133,8 @@ export default function ApiKeysTable() {
       console.error('Failed to create API key:', error);
     } finally {
       setIsCreating(false);
-      setIsDialogOpen(false);  // Close the dialog box
-      fetchApiKeys();  // Refresh the API keys list
+      setIsDialogOpen(false); // Close the dialog box
+      fetchApiKeys(); // Refresh the API keys list
     }
   };
 
@@ -125,17 +146,22 @@ export default function ApiKeysTable() {
 
   const deleteApiKey = async (apiKeyData: ApiKey) => {
     try {
-      const response = await fetchWithTimeout(`${apiUrl}/v0/deleteApiKey/?emailId=${user?.primaryEmailAddress?.emailAddress}&apiKey=${apiKeyData.api_key}&apiKeyName=${apiKeyData.name}`, {
-        method: 'GET',
-        headers: {
-          'x-api-key': apiKey
+      const response = await fetchWithTimeout(
+        `${apiUrl}/v0/deleteApiKey/?emailId=${user?.primaryEmailAddress?.emailAddress}&apiKey=${apiKeyData.api_key}&apiKeyName=${apiKeyData.name}`,
+        {
+          method: 'GET',
+          headers: {
+            'x-api-key': apiKey
+          }
         }
-      });
+      );
       if (response.status === 200) {
-        setApiKeys(apiKeys.filter((apiKey) => apiKey.api_key !== apiKeyData.api_key));
+        setApiKeys(
+          apiKeys.filter((apiKey) => apiKey.api_key !== apiKeyData.api_key)
+        );
         setNewApiKey(null);
       } else {
-        alert("Something went wrong, please try again later");
+        alert('Something went wrong, please try again later');
       }
     } catch (error) {
       console.error('Failed to delete API key:', error);
@@ -144,11 +170,11 @@ export default function ApiKeysTable() {
 
   if (!mounted) return null;
 
-  const hasStarterPlan = apiKeys.some(key => key.plan === 'STARTER');
+  const hasStarterPlan = apiKeys.some((key) => key.plan === 'STARTER');
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-4">
+      <div className="mb-4 flex items-center justify-between">
         <h1 className="text-xl font-semibold">API Keys List</h1>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
@@ -158,11 +184,18 @@ export default function ApiKeysTable() {
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>{hasStarterPlan ? 'API Key Creation Restricted' : 'Create New API Key'}</DialogTitle>
+              <DialogTitle>
+                {hasStarterPlan
+                  ? 'API Key Creation Restricted'
+                  : 'Create New API Key'}
+              </DialogTitle>
             </DialogHeader>
             {hasStarterPlan ? (
               <div>
-                <p>You already have an API key for the STARTER plan. Please upgrade to create one more API key.</p>
+                <p>
+                  You already have an API key for the STARTER plan. Please
+                  upgrade to create one more API key.
+                </p>
               </div>
             ) : !newApiKey ? (
               <>
@@ -173,16 +206,34 @@ export default function ApiKeysTable() {
               </>
             ) : (
               <div className="mt-4">
-                <div className="flex items-center mb-2">
+                <div className="mb-2 flex items-center">
                   <span className="mr-2">New API Key:</span>
-                  <span className="font-mono">{showApiKey ? newApiKey.apiKey : '*******************************'}</span>
-                  <Button variant="ghost" size="sm" onClick={() => setShowApiKey(!showApiKey)}>
-                    {showApiKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  <span className="font-mono">
+                    {showApiKey
+                      ? newApiKey.apiKey
+                      : '*******************************'}
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowApiKey(!showApiKey)}
+                  >
+                    {showApiKey ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
                   </Button>
-                  <Button variant="ghost" size="sm" onClick={() => handleCopy(newApiKey.apiKey)}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleCopy(newApiKey.apiKey)}
+                  >
                     <Copy className="h-4 w-4" />
                   </Button>
-                  {copied && <span className="text-green-600 ml-2">Copied!</span>}
+                  {copied && (
+                    <span className="ml-2 text-green-600">Copied!</span>
+                  )}
                 </div>
               </div>
             )}
@@ -190,13 +241,16 @@ export default function ApiKeysTable() {
         </Dialog>
       </div>
       {isLoading ? (
-        <div className="flex justify-center items-center h-64">
-          <img src={imageSrc} alt="Loading" className="w-12 h-12" />
+        <div className="flex h-64 items-center justify-center">
+          <img src={imageSrc} alt="Loading" className="h-12 w-12" />
         </div>
       ) : (
-        <DataTable searchKey="name" columns={createColumns(deleteApiKey)} data={apiKeys} />
+        <DataTable
+          searchKey="name"
+          columns={createColumns(deleteApiKey)}
+          data={apiKeys}
+        />
       )}
     </div>
   );
 }
-
