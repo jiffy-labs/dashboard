@@ -77,8 +77,6 @@ const Metrics: React.FC = () => {
       return;
     }
 
-    console.log('Selected API Key:', api_key);
-    console.log('Selected API Name:', api_name);
 
     const fetchData = async () => {
       try {
