@@ -118,7 +118,7 @@ const Metrics: React.FC = () => {
   const apiUrl = process.env.NODE_ENV === 'production'
     ? process.env.NEXT_PUBLIC_API_URL_PROD
     : process.env.NEXT_PUBLIC_API_URL_DEV;
-  const apiKey = process.env.NEXT_PUBLIC_API_KEY ?? 'TestAPIKeyDontUseInCode';
+  const apiKey = process.env.NEXT_PUBLIC_API_KEY ?? 'TestApiKeyOnlyUseDashboardForProd';
 
   return (
     <div className="p-6 md:p-10 bg-gray-50 dark:bg-gray-900 min-h-screen">
