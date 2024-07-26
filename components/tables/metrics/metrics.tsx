@@ -1,10 +1,27 @@
-"use client"
+'use client'
 import React, { useState, useEffect } from 'react';
 import BarChart from './BarChart';
 import axios from 'axios';
 import { Log, ApiKey } from '@/components/types';
 import { useClerk } from '@clerk/clerk-react';
 import { format, parseISO, addDays } from 'date-fns';
+
+const fetchWithTimeout = async (url: string, options: RequestInit = {}, timeout: number = 5000) => {
+  const controller = new AbortController();
+  const { signal } = controller;
+
+  const fetchPromise = fetch(url, { ...options, signal });
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+  try {
+    const response = await fetchPromise;
+    clearTimeout(timeoutId);
+    return response;
+  } catch (error) {
+    clearTimeout(timeoutId);
+    throw error;
+  }
+};
 
 const Metrics: React.FC = () => {
   const { user } = useClerk();
@@ -20,9 +37,9 @@ const Metrics: React.FC = () => {
   useEffect(() => {
     const fetchApiKeys = async () => {
       try {
-        const response = await fetch(`https://api-dev.jiffyscan.xyz/v0/getApiKeys?emailId=${user?.primaryEmailAddress?.emailAddress}`, {
+        const response = await fetchWithTimeout(`${apiUrl}/v0/getApiKeys?emailId=${user?.primaryEmailAddress?.emailAddress}`, {
           headers: {
-            'x-api-key': 'TestAPIKeyDontUseInCode'
+            'x-api-key': apiKey
           }
         });
         if (response.ok) {
@@ -50,7 +67,7 @@ const Metrics: React.FC = () => {
 
   useEffect(() => {
     if (!selectedApiKey) {
-      console.warn('selectedApiKey is empty or undefined');
+      console.debug('selectedApiKey is empty or undefined');
       return;
     }
 
@@ -65,9 +82,9 @@ const Metrics: React.FC = () => {
 
     const fetchData = async () => {
       try {
-        const response = await axios.get(`https://api-dev.jiffyscan.xyz/v0/getApiKeyUsage?apiKeyName=${api_name}&dateRange=${filter === '7days' ? 7 : 30}`, {
+        const response = await axios.get(`${apiUrl}/v0/getApiKeyUsage?apiKeyName=${api_name}&dateRange=${filter === '7days' ? 7 : 30}`, {
           headers: {
-            'x-api-key': api_key
+            'x-api-key': apiKey
           }
         });
 
@@ -99,6 +116,11 @@ const Metrics: React.FC = () => {
 
     fetchData();
   }, [filter, selectedApiKey]);
+
+  const apiUrl = process.env.NODE_ENV === 'production'
+    ? process.env.NEXT_PUBLIC_API_URL_PROD
+    : process.env.NEXT_PUBLIC_API_URL_DEV;
+  const apiKey = process.env.NEXT_PUBLIC_API_KEY ?? 'TestAPIKeyDontUseInCode';
 
   return (
     <div className="p-6 md:p-10 bg-gray-50 dark:bg-gray-900 min-h-screen">
