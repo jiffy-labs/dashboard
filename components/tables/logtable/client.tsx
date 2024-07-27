@@ -16,6 +16,8 @@ import {
 import { useTheme } from 'next-themes';
 import { CHAINID_NETWORK_MAP } from '@/constants/data';
 import EmptyState from '@/components/ui/empty-state';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const fetchWithTimeout = async (
   url: string,
@@ -43,7 +45,7 @@ export default function LogTable() {
   const [data, setData] = useState<Log[]>([]);
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
   const [selectedApiKey, setSelectedApiKey] = useState<string>('');
-  const [statusFilter, setStatusFilter] = useState<string>('All'); // New state for status filter
+  const [statusFilter, setStatusFilter] = useState<string>('All');
   const [isLoading, setIsLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
   const { theme } = useTheme();
@@ -68,6 +70,19 @@ export default function LogTable() {
       : process.env.NEXT_PUBLIC_API_URL_DEV;
   const apiKey =
     process.env.NEXT_PUBLIC_API_KEY ?? 'TestApiKeyOnlyUseDashboardForProd';
+
+  const notify = (message: string, type: 'success' | 'error' = 'success') => {
+    toast(message, {
+      type,
+      position: 'bottom-left',
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+    });
+  };
 
   useEffect(() => {
     const fetchApiKeys = async () => {
@@ -102,6 +117,7 @@ export default function LogTable() {
         }
       } catch (error) {
         console.error('Failed to fetch API keys:', error);
+        notify('Failed to fetch API keys', 'error');
       }
     };
 
@@ -147,7 +163,6 @@ export default function LogTable() {
                 : 'Failure'
           }));
 
-          // Apply status filter
           const filteredData =
             statusFilter === 'All'
               ? formattedData
@@ -159,6 +174,7 @@ export default function LogTable() {
           setData(filteredData);
         } catch (error) {
           console.error('Failed to fetch logs:', error);
+          notify('Failed to fetch logs', 'error');
         } finally {
           setIsLoading(false);
         }
@@ -172,6 +188,7 @@ export default function LogTable() {
 
   return (
     <>
+      <ToastContainer />
       <div className="flex flex-row items-start justify-between">
         <div className="w-full md:w-auto">
           <Select onValueChange={setStatusFilter} defaultValue="All">

@@ -1,10 +1,13 @@
 'use client';
+
 import React, { useState, useEffect } from 'react';
 import BarChart from './BarChart';
 import axios from 'axios';
 import { Log, ApiKey } from '@/components/types';
 import { useClerk } from '@clerk/clerk-react';
 import { format, parseISO, addDays } from 'date-fns';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const fetchWithTimeout = async (url: string, options: RequestInit = {}, timeout: number = 5000) => {
   const controller = new AbortController();
@@ -37,6 +40,24 @@ const Metrics: React.FC = () => {
     datasets: []
   });
 
+  const notify = (message: string, type: 'success' | 'error' = 'success') => {
+    toast(message, {
+      type,
+      position: 'bottom-left',
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+    });
+  };
+
+  const apiUrl = process.env.NODE_ENV === 'production'
+    ? process.env.NEXT_PUBLIC_API_URL_PROD
+    : process.env.NEXT_PUBLIC_API_URL_DEV;
+  const apiKey = process.env.NEXT_PUBLIC_API_KEY ?? 'TestApiKeyOnlyUseDashboardForProd';
+
   useEffect(() => {
     const fetchApiKeys = async () => {
       try {
@@ -44,7 +65,7 @@ const Metrics: React.FC = () => {
           headers: {
             'x-api-key': apiKey,
           },
-      });
+        });
         if (response.ok) {
           const json = await response.json();
           const data = JSON.parse(json);
@@ -53,13 +74,16 @@ const Metrics: React.FC = () => {
             setApiKeys(data);
           } else {
             console.error('Data is not an array:', data);
+            notify('Data is not an array', 'error');
           }
         } else {
           const errorData = await response.json();
           console.error('Failed to fetch API keys:', errorData);
+          notify('Failed to fetch API keys', 'error');
         }
       } catch (error) {
         console.error('Failed to fetch:', error);
+        notify('Failed to fetch API keys', 'error');
       } finally {
         setIsLoading(false);
       }
@@ -80,14 +104,13 @@ const Metrics: React.FC = () => {
       return;
     }
 
-
     const fetchData = async () => {
       try {
         const response = await axios.get(`${apiUrl}/v0/getApiKeyUsage?apiKeyName=${api_name}&dateRange=${filter === '7days' ? 7 : 30}`, {
           headers: {
             'x-api-key': apiKey
           }
-      });
+        });
 
         const data = response.data;
 
@@ -116,20 +139,16 @@ const Metrics: React.FC = () => {
         setChartData({ labels, datasets });
       } catch (error) {
         console.error('Error fetching API data:', error);
-        // Handle error
+        notify('Error fetching API data', 'error');
       }
     };
 
     fetchData();
   }, [filter, selectedApiKey]);
 
-  const apiUrl = process.env.NODE_ENV === 'production'
-    ? process.env.NEXT_PUBLIC_API_URL_PROD
-    : process.env.NEXT_PUBLIC_API_URL_DEV;
-  const apiKey = process.env.NEXT_PUBLIC_API_KEY ?? 'TestApiKeyOnlyUseDashboardForProd';
-
   return (
     <div className="min-h-screen bg-gray-50 p-6 dark:bg-gray-900 md:p-10">
+      <ToastContainer />
       <div className="mb-6 flex items-center justify-between">
         <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200 md:text-4xl">
           Daily Requests
