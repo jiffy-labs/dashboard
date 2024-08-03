@@ -15,27 +15,10 @@ import { useUser } from '@clerk/nextjs';
 import { createColumns } from './columns';
 import { Plus, Check, Copy, Eye, EyeOff } from 'lucide-react';
 import { useTheme } from 'next-themes';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { fetchWithTimeout,notify } from '../utils/utils';
 
-const fetchWithTimeout = async (
-  url: string,
-  options: RequestInit = {},
-  timeout: number = 5000
-) => {
-  const controller = new AbortController();
-  const { signal } = controller;
-
-  const fetchPromise = fetch(url, { ...options, signal });
-  const timeoutId = setTimeout(() => controller.abort(), timeout);
-
-  try {
-    const response = await fetchPromise;
-    clearTimeout(timeoutId);
-    return response;
-  } catch (error) {
-    clearTimeout(timeoutId);
-    throw error;
-  }
-};
 
 export default function ApiKeysTable() {
   const { user } = useUser();
@@ -73,6 +56,7 @@ export default function ApiKeysTable() {
   const apiKey =
     process.env.NEXT_PUBLIC_API_KEY ?? 'TestApiKeyOnlyUseDashboardForProd';
 
+
   const fetchApiKeys = async () => {
     try {
       const response = await fetchWithTimeout(
@@ -94,9 +78,11 @@ export default function ApiKeysTable() {
       } else {
         const errorData = await response.json();
         console.error('Failed to fetch API keys:', errorData);
+        notify('Failed to fetch API keys', 'error');
       }
     } catch (error) {
       console.error('Failed to fetch:', error);
+      notify('Failed to fetch API keys', 'error');
     } finally {
       setIsLoading(false);
     }
@@ -113,6 +99,7 @@ export default function ApiKeysTable() {
 
     if (hasStarterPlan) {
       setIsCreating(false);
+      notify('You already have an API key for the STARTER plan. Please upgrade to create one more API key.', 'error');
       return;
     }
 
@@ -129,8 +116,10 @@ export default function ApiKeysTable() {
       const data = await response.json();
       setNewApiKey(data);
       setApiKeys([...apiKeys, data]);
+      notify('API key created successfully', 'success');
     } catch (error) {
       console.error('Failed to create API key:', error);
+      notify('Failed to create API key', 'error');
     } finally {
       setIsCreating(false);
       setIsDialogOpen(false); // Close the dialog box
@@ -160,11 +149,14 @@ export default function ApiKeysTable() {
           apiKeys.filter((apiKey) => apiKey.api_key !== apiKeyData.api_key)
         );
         setNewApiKey(null);
+        notify('API key deleted successfully', 'success');
       } else {
         alert('Something went wrong, please try again later');
+        notify('Failed to delete API key', 'error');
       }
     } catch (error) {
       console.error('Failed to delete API key:', error);
+      notify('Failed to delete API key', 'error');
     }
   };
 
@@ -174,6 +166,7 @@ export default function ApiKeysTable() {
 
   return (
     <div>
+      <ToastContainer />
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-xl font-semibold">API Keys List</h1>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
