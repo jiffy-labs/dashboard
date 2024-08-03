@@ -18,27 +18,9 @@ import { CHAINID_NETWORK_MAP } from '@/constants/data';
 import EmptyState from '@/components/ui/empty-state';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { fetchWithTimeout,notify } from '../utils/utils';
 
-const fetchWithTimeout = async (
-  url: string,
-  options: RequestInit = {},
-  timeout: number = 5000
-) => {
-  const controller = new AbortController();
-  const { signal } = controller;
 
-  const fetchPromise = fetch(url, { ...options, signal });
-  const timeoutId = setTimeout(() => controller.abort(), timeout);
-
-  try {
-    const response = await fetchPromise;
-    clearTimeout(timeoutId);
-    return response;
-  } catch (error) {
-    clearTimeout(timeoutId);
-    throw error;
-  }
-};
 
 export default function LogTable() {
   const { user } = useClerk();
@@ -71,18 +53,6 @@ export default function LogTable() {
   const apiKey =
     process.env.NEXT_PUBLIC_API_KEY ?? 'TestApiKeyOnlyUseDashboardForProd';
 
-  const notify = (message: string, type: 'success' | 'error' = 'success') => {
-    toast(message, {
-      type,
-      position: 'bottom-left',
-      autoClose: 5000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-    });
-  };
 
   useEffect(() => {
     const fetchApiKeys = async () => {

@@ -17,27 +17,8 @@ import { Plus, Check, Copy, Eye, EyeOff } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { fetchWithTimeout,notify } from '../utils/utils';
 
-const fetchWithTimeout = async (
-  url: string,
-  options: RequestInit = {},
-  timeout: number = 5000
-) => {
-  const controller = new AbortController();
-  const { signal } = controller;
-
-  const fetchPromise = fetch(url, { ...options, signal });
-  const timeoutId = setTimeout(() => controller.abort(), timeout);
-
-  try {
-    const response = await fetchPromise;
-    clearTimeout(timeoutId);
-    return response;
-  } catch (error) {
-    clearTimeout(timeoutId);
-    throw error;
-  }
-};
 
 export default function ApiKeysTable() {
   const { user } = useUser();
@@ -75,18 +56,6 @@ export default function ApiKeysTable() {
   const apiKey =
     process.env.NEXT_PUBLIC_API_KEY ?? 'TestApiKeyOnlyUseDashboardForProd';
 
-  const notify = (message: string, type: 'success' | 'error' = 'success') => {
-    toast(message, {
-      type,
-      position: 'bottom-left',
-      autoClose: 5000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-    });
-  };
 
   const fetchApiKeys = async () => {
     try {

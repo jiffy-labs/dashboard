@@ -8,23 +8,9 @@ import { useClerk } from '@clerk/clerk-react';
 import { format, parseISO, addDays } from 'date-fns';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { fetchWithTimeout,notify } from '../utils/utils';
 
-const fetchWithTimeout = async (url: string, options: RequestInit = {}, timeout: number = 5000) => {
-  const controller = new AbortController();
-  const { signal } = controller;
 
-  const fetchPromise = fetch(url, { ...options, signal });
-  const timeoutId = setTimeout(() => controller.abort(), timeout);
-
-  try {
-    const response = await fetchPromise;
-    clearTimeout(timeoutId);
-    return response;
-  } catch (error) {
-    clearTimeout(timeoutId);
-    throw error;
-  }
-};
 
 const Metrics: React.FC = () => {
   const { user } = useClerk();
@@ -40,18 +26,6 @@ const Metrics: React.FC = () => {
     datasets: []
   });
 
-  const notify = (message: string, type: 'success' | 'error' = 'success') => {
-    toast(message, {
-      type,
-      position: 'bottom-left',
-      autoClose: 5000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-    });
-  };
 
   const apiUrl = process.env.NODE_ENV === 'production'
     ? process.env.NEXT_PUBLIC_API_URL_PROD
