@@ -51,7 +51,7 @@ export default function LogTable() {
       ? process.env.NEXT_PUBLIC_API_URL_PROD
       : process.env.NEXT_PUBLIC_API_URL_DEV;
   const apiKey =
-    process.env.NEXT_PUBLIC_API_KEY ?? 'TestApiKeyOnlyUseDashboardForProd';
+    process.env.NEXT_PUBLIC_API_KEY ?? 'gFQghtJC6F734nPaUYK8M3ggf9TOpojkbNTH9gR5';
 
 
   useEffect(() => {
@@ -116,8 +116,8 @@ export default function LogTable() {
               item.chainId === -1
                 ? 'N/A'
                 : CHAINID_NETWORK_MAP[
-                    item.chainId as keyof typeof CHAINID_NETWORK_MAP
-                  ],
+                item.chainId as keyof typeof CHAINID_NETWORK_MAP
+                ],
             request: JSON.stringify(item.request, null, 2),
             response: JSON.stringify(item.response, null, 2),
             httpCode: item.status,
@@ -129,17 +129,17 @@ export default function LogTable() {
                   ? 'Success'
                   : 'Failure'
                 : item.status === 200
-                ? 'Success'
-                : 'Failure'
+                  ? 'Success'
+                  : 'Failure'
           }));
 
           const filteredData =
             statusFilter === 'All'
               ? formattedData
               : formattedData.filter(
-                  (item: { responseStatus: string }) =>
-                    item.responseStatus === statusFilter
-                );
+                (item: { responseStatus: string }) =>
+                  item.responseStatus === statusFilter
+              );
 
           setData(filteredData);
         } catch (error) {

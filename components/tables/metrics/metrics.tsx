@@ -8,7 +8,7 @@ import { useClerk } from '@clerk/clerk-react';
 import { format, parseISO, addDays } from 'date-fns';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { fetchWithTimeout,notify } from '../utils/utils';
+import { fetchWithTimeout, notify } from '../utils/utils';
 
 
 

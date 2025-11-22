@@ -54,7 +54,7 @@ export default function ApiKeysTable() {
       ? process.env.NEXT_PUBLIC_API_URL_PROD
       : process.env.NEXT_PUBLIC_API_URL_DEV;
   const apiKey =
-    process.env.NEXT_PUBLIC_API_KEY ?? 'TestApiKeyOnlyUseDashboardForProd';
+    process.env.NEXT_PUBLIC_API_KEY ?? 'gFQghtJC6F734nPaUYK8M3ggf9TOpojkbNTH9gR5';
 
 
   const fetchApiKeys = async () => {
