@@ -21,11 +21,14 @@ const PostHogPageView = dynamic(() => import('./PostHogPageView'), {
   ssr: false,
 })
 
+)
+
 export default async function RootLayout({
   children
 }: {
   children: React.ReactNode;
 }) {
+  console.log("Server-side Clerk Key Check:", process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ? "Loaded" : "Missing");
   return (
     <ClerkProvider
       appearance={{
