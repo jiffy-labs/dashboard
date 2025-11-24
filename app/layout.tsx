@@ -21,7 +21,7 @@ const PostHogPageView = dynamic(() => import('./PostHogPageView'), {
   ssr: false,
 })
 
-)
+
 
 export default async function RootLayout({
   children
