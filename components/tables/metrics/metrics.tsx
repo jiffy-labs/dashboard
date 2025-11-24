@@ -47,7 +47,7 @@ const Metrics: React.FC = () => {
           if (Array.isArray(data)) {
             setApiKeys(data);
           } else {
-            console.error('Data is not an array:', data);
+            console.error('Data is not an array::', data);
             notify('Data is not an array', 'error');
           }
         } else {
