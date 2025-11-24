@@ -5,7 +5,7 @@ import type { Metadata } from 'next';
 import NextTopLoader from 'nextjs-toploader';
 import { Inter } from 'next/font/google';
 import './globals.css';
-import { auth } from '@/auth';
+
 import { ClerkProvider } from '@clerk/nextjs'
 import { PHProvider } from './providers';
 import dynamic from 'next/dynamic';
@@ -26,26 +26,25 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const session = await auth();
   return (
     <ClerkProvider
-    appearance={{
-      elements: {
-        footer: "hidden",
-      },
-    }}
+      appearance={{
+        elements: {
+          footer: "hidden",
+        },
+      }}
     >
-    <html lang="en" suppressHydrationWarning>
-    <PHProvider>
-      <body className={`${inter.className} overflow-hidden`}>
-        <NextTopLoader />
-        <Providers session={session}>
-          <Toaster />
-          {children}
-        </Providers>
-      </body>
-      </PHProvider>
-    </html>
+      <html lang="en" suppressHydrationWarning>
+        <PHProvider>
+          <body className={`${inter.className} overflow-hidden`}>
+            <NextTopLoader />
+            <Providers>
+              <Toaster />
+              {children}
+            </Providers>
+          </body>
+        </PHProvider>
+      </html>
     </ClerkProvider>
   );
 }
